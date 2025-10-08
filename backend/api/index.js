@@ -1,14 +1,10 @@
 // backend/api/index.js
-// Tiny adapter so your existing Express routes run on Vercel serverless.
-
 const express = require("express");
 const cors = require("cors");
 
-function safeRequire(p) {
-  try { return require(p); } catch (e) { console.log(`Optional ${p}:`, e?.message || e); return null; }
-}
+function safeRequire(p) { try { return require(p); } catch (e) { console.log(`Optional ${p}:`, e?.message || e); return null; } }
 
-try { safeRequire("../config/initDatabase"); } catch {}
+safeRequire("../config/initDatabase"); // ok if it does nothing
 
 const auth = safeRequire("../routes/auth");
 const admin = safeRequire("../routes/admin");
@@ -31,6 +27,7 @@ app.use(cors({
   },
   credentials: true
 }));
+
 app.use(express.json());
 
 app.get("/health", (_, res) => res.json({ ok: true }));
@@ -43,5 +40,5 @@ if (integrations) app.use("/api/integrations", integrations);
 if (niches) app.use("/api/niches", niches);
 if (trends) app.use("/api/trends", trends);
 
-// Export as a serverless function
+// Export as serverless handler
 module.exports = (req, res) => app(req, res);
